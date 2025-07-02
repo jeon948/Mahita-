@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do List Extended</title>
+  <style>
+    :root {
+      --bg-color: #000;
+      --container-bg: #1a1a1a;
+      --text-color: #f0f0f0;
+      --input-bg: #333;
+      --task-bg: #333;
+      --btn-bg: #8B0000;
+      --btn-hover: #660000;
+      --undo-bg: #444;
+      --undo-hover: #666;
+      --done-bg: #2ecc71;
+      --done-hover: #27ae60;
+    }
+
+    body.light {
+      --bg-color: #f4f4f4;
+      --container-bg: #ffffff;
+      --text-color: #000;
+      --input-bg: #eaeaea;
+      --task-bg: #dddddd;
+      --btn-bg: #c0392b;
+      --btn-hover: #a93226;
+      --undo-bg: #cccccc;
+      --undo-hover: #bbbbbb;
+      --done-bg: #2ecc71;
+      --done-hover: #27ae60;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--undo-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--undo-hover);
+    }
+
+    .todo-container {
+      background: var(--container-bg);
+      padding: 30px 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
+      width: 100%;
+      max-width: 400px;
+      transition: background-color 0.3s ease;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-section {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--input-bg);
+      color: var(--text-color);
+    }
+
+    button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--btn-bg);
+      color: white;
+      cursor: pointer;
+      transition: 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .undo-btn {
+      background-color: var(--undo-bg);
+      color: var(--text-color);
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .undo-btn:hover {
+      background-color: var(--undo-hover);
+    }
+
+    ul {
+      margin-top: 20px;
+      list-style-type: none;
+    }
+
+    li {
+      background: var(--task-bg);
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-color);
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: #777;
+    }
+
+    .task-text {
+      flex: 1;
+      margin-right: 10px;
+      cursor: default;
+    }
+
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .delete-btn:hover {
+      background: #c0392b;
+    }
+
+    .done-btn {
+      background: var(--done-bg);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .done-btn:hover {
+      background: var(--done-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Theme</button>
+
+  <div class="todo-container">
+    <h2>📝 To-Do List</h2>
+    <div class="input-section">
+      <input type="text" id="taskInput" placeholder="Add a new task..." />
+      <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+    <button class="undo-btn" onclick="undoDelete()">Undo Last Delete</button>
+  </div>
+
+  <script>
+    let lastDeletedTask = null;
+
+    function addTask() {
+      const taskInput = document.getElementById("taskInput");
+      const taskText = taskInput.value.trim();
+
+      if (taskText === "") {
+        alert("Please enter a task!");
+        return;
+      }
+
+      const li = createTaskElement(taskText);
+      document.getElementById("taskList").appendChild(li);
+      taskInput.value = "";
+    }
+
+    function createTaskElement(taskText) {
+      const li = document.createElement("li");
+
+      const span = document.createElement("span");
+      span.className = "task-text";
+      span.textContent = taskText;
+
+      const doneBtn = document.createElement("button");
+      doneBtn.textContent = "Done";
+      doneBtn.className = "done-btn";
+      doneBtn.onclick = function () {
+        li.classList.toggle("completed");
+      };
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete";
+      delBtn.className = "delete-btn";
+      delBtn.onclick = function () {
+        lastDeletedTask = {
+          text: span.textContent,
+          completed: li.classList.contains("completed")
+        };
+        li.remove();
+      };
+
+      li.appendChild(span);
+      li.appendChild(doneBtn);
+      li.appendChild(delBtn);
+
+      return li;
+    }
+
+    function undoDelete() {
+      if (lastDeletedTask) {
+        const li = createTaskElement(lastDeletedTask.text);
+        if (lastDeletedTask.completed) {
+          li.classList.add("completed");
+        }
+        document.getElementById("taskList").appendChild(li);
+        lastDeletedTask = null;
+      } else {
+        alert("Nothing to undo!");
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light");
+    }
+  </script>
+
+</body>
+</html>
+
